@@ -6,25 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// User represents a user record
-// @Description Represents a sale record with customer details and total amount
-// type User struct {
-// 	ID            uint   `gorm:"unique;primaryKey;autoIncrement"`
-// 	Username      string `json:"username" gorm:"text;not null;default:null"`       // @Description Customer Email
-// 	Password      string `json:"password" gorm:"text;not null;default:null"`       // @Description Customer Email
-// 	CustomerEmail string `json:"customer_email" gorm:"text;not null;default:null"` // @Description Customer Email
-// 	IsAdmin       bool   `json:"is_admin" gorm:"not null;default:false"`           // @Description Customer Email
-// }
-
-type User struct {
-	gorm.Model
-	ID       uint   `gorm:"unique;primaryKey;autoIncrement"`
-	Username string `json:"username" gorm:"text;not null;default:null"`     // @Description Username
-	Password string `json:"password" gorm:"size:255;not null;default:null"` // @Description Password
-	Email    string `json:"email" gorm:"size:255;default:null"`             // @Description Email
-	IsAdmin  bool   `json:"is_admin" gorm:"not null;default:false"`         // @Description Is Admin, default false
-}
-
 type Item struct {
 	gorm.Model
 	ID       uint    `gorm:"unique;primaryKey;autoIncrement"`

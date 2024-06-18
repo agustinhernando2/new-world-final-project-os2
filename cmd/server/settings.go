@@ -1,10 +1,11 @@
-package settings
+package server
 
 import (
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -12,14 +13,15 @@ import (
 	"gorm.io/gorm/schema"
 )
 
+
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func Get(key, def string) string {
-	value, ok := LookupEnv(key)
+func GetEnvValue(key, def string) string {
+	value, ok := os.LookupEnv(key)
 	if ok {
 		return value
 	}
@@ -49,9 +51,10 @@ func connectDatabase(pass, user, name string) {
 
 	log.Println("Connected")
 	db.Logger = logger.Default.LogMode(logger.Info)
+	dbMigrate(db)
 }
 
-func dbMigrate() {
+func dbMigrate(db *gorm.DB) {
 	// Migrate the schema
 	log.Println("Running migrations")
 	db.AutoMigrate(&models.User{}, &models.Item{}, &models.Order{}, &models.OrderItem{})
