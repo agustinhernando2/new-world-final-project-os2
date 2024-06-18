@@ -267,3 +267,17 @@ Our backend application will interface with the existing HPCPP project to access
 > | `200`         | `application/json`                | `{"code":"200",{"message":"success" } `|
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 </details>
+
+
+
+
+##### Utils
+
+[https://divrhino.com/articles/rest-api-docker-go-fiber-from-scratch/#dockerfile-vs-docker-compose](Build a REST API from scratch with Go, Docker & Postgres)
+
+```
+docker compose run --service-ports web bash
+go get gorm.io/gorm
+go get gorm.io/driver/postgres
+
+```
