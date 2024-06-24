@@ -281,3 +281,10 @@ go get gorm.io/gorm
 go get gorm.io/driver/postgres
 
 ```
+
+Model View Repository
+- **Explicación del diseño**:
+  - **Servicios (AuthService y AdminService)**: Encapsulan la lógica de negocio relacionada con las operaciones de autenticación y administración respectivamente.
+  - **Controladores (AuthController y AdminController)**: Utilizan los servicios para manejar las solicitudes HTTP.
+  - **Repositorios (UserRepository, ItemRepository y OrderRepository)**: Son los responsables de interactuar con la base de datos, pero ahora son utilizados principalmente por los servicios.
+  - Esta estructura promueve una separación clara de responsabilidades y facilita la reutilización del código, ya que los servicios pueden ser utilizados en diferentes contextos (por ejemplo, en un CLI o en pruebas unitarias).

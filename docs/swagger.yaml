@@ -1,0 +1,67 @@
+definitions:
+  github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User:
+    description: User
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        description: '@Description Email'
+        type: string
+      id:
+        type: integer
+      is_admin:
+        description: '@Description Is Admin, default false'
+        type: boolean
+      password:
+        description: '@Description Password'
+        type: string
+      updatedAt:
+        type: string
+      username:
+        description: '@Description Username'
+        type: string
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+info:
+  contact: {}
+  description: This is an Order Api just for young people
+  termsOfService: http://swagger.io/terms/
+  title: Order Api
+  version: "1.0"
+paths:
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the data provided in the request body.
+      parameters:
+      - description: Data of the user to register
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User'
+        "400":
+          description: Cannot parse input data or registering user
+          schema:
+            type: string
+      summary: Register user
+      tags:
+      - Auth
+swagger: "2.0"
