@@ -16,6 +16,95 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Authenticate a user with the data provided in the request body.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "description": "Data of the user to authenticate",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User logged successfully",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Cannot parse input data or login user",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Error creating token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/offers": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of available offers.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Retrieve a list of available offers",
+                "responses": {
+                    "200": {
+                        "description": "List of available offers",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Item"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve offers",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "description": "Register a new user with the data provided in the request body.",
@@ -55,9 +144,135 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/login": {
+            "get": {
+                "description": "Retrieve the login page using HTML template.",
+                "consumes": [
+                    "text/html"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Retrieve the login page",
+                "responses": {
+                    "200": {
+                        "description": "Login page",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "get": {
+                "description": "Retrieve the signup page using HTML template.",
+                "consumes": [
+                    "text/html"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Retrieve the signup page",
+                "responses": {
+                    "200": {
+                        "description": "Signup page",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "fiber.Map": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Item": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "description": "@Description Item Category",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "@Description Item Name",
+                    "type": "string"
+                },
+                "orders": {
+                    "description": "@Description Orders associated with this item",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order"
+                    }
+                },
+                "price": {
+                    "description": "@Description Item Price",
+                    "type": "number"
+                },
+                "quantity": {
+                    "description": "@Description Item Quantity",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "@Description Order Status",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "items": {
+                    "description": "@Description Items associated with this order",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Item"
+                    }
+                },
+                "status": {
+                    "description": "@Description Order Status",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "@Description User ID",
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User": {
             "description": "User",
             "type": "object",
@@ -75,7 +290,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_admin": {
+                "isAdmin": {
                     "description": "@Description Is Admin, default false",
                     "type": "boolean"
                 },

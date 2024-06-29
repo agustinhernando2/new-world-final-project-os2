@@ -21,17 +21,18 @@ type Item struct {
 type Order struct {
 	gorm.Model
 	ID     uint   `gorm:"unique;primaryKey;autoIncrement"`
-	UserID uint   `json:"user_id" gorm:"not null;default:0"`        // @Description User ID
+	UserID uint   `json:"userId" gorm:"not null;default:0"`         // @Description User ID
 	Status string `json:"status" gorm:"text;not null;default:null"` // @Description Order Status
 	Items  []Item `json:"items" gorm:"many2many:order_item;"`       // @Description Items associated with this order
 }
 
 type OrderItem struct {
-	UserID    uint `gorm:"primaryKey"`
-	CourseID  uint `gorm:"primaryKey"`
+	OrderID   uint `gorm:"primaryKey"`
+	ItemID    uint `gorm:"primaryKey"`
 	CreatedAt time.Time
 	DeletedAt gorm.DeletedAt
-	Quantity  int `json:"quantity" gorm:"not null;default:0"` // @Description Item Quantity in Order
+	Price     float64 `json:"price" gorm:"not null;default:0"`    // @Description Item Price
+	Quantity  int     `json:"quantity" gorm:"not null;default:0"` // @Description Item Quantity in Order
 }
 
 func (Item) BeforeCreate(db *gorm.DB) error {

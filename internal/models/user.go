@@ -10,8 +10,8 @@ type User struct {
 	ID       uint   `gorm:"unique;primaryKey;autoIncrement"`
 	Username string `json:"username" gorm:"text;not null;default:null"`     // @Description Username
 	Password string `json:"password" gorm:"size:255;not null;default:null"` // @Description Password
-	Email    string `json:"email" gorm:"size:255;not null;default:null"`             // @Description Email
-	IsAdmin  bool   `json:"is_admin" gorm:"not null;default:false"`         // @Description Is Admin, default false
+	Email    string `json:"email" gorm:"size:255;not null;default:null"`    // @Description Email
+	IsAdmin  bool   `json:"isAdmin" gorm:"not null;default:false"`          // @Description Is Admin, default false
 }
 
 func (User) BeforeCreate(db *gorm.DB) error {

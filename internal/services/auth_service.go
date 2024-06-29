@@ -2,6 +2,7 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 
@@ -13,10 +14,9 @@ type AuthService interface {
 	RegisterUser(user *models.User) error
 	AuthenticateUser(user *models.User) error
 	GetOffers() ([]*models.Item, error)
-	CheckoutOrders(userID uint, orderIDs []uint) error
+	CheckoutOrders(userID uint, items []models.OrderItem) (*models.Order, error)
 	GetOrderStatus(orderID uint) (*models.Order, error)
 	GetUserFromId(userID uint) (*models.User, error)
-	// IsEmailValid(e string) bool
 }
 
 type authService struct {
@@ -40,8 +40,6 @@ func isEmailValid(e string) bool {
 func isPasswordValid(p string) bool {
 	return regexp.MustCompile(`[a-zA-Z0-9]+`).MatchString(p)
 }
-
-
 
 func (s *authService) RegisterUser(user *models.User) error {
 	// check email format
@@ -83,7 +81,8 @@ func (s *authService) AuthenticateUser(user *models.User) error {
 	if err != nil {
 		return err
 	}
-	user.IsAdmin = u.IsAdmin
+	// Copy all fields from u to user
+	*user = *u
 	return nil
 }
 
@@ -91,9 +90,68 @@ func (s *authService) GetOffers() ([]*models.Item, error) {
 	return s.itemRepo.FindOffers()
 }
 
-func (s *authService) CheckoutOrders(userID uint, orderIDs []uint) error {
-	// Implementar lógica para realizar la compra de órdenes
-	return nil
+func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*models.Order, error) {
+
+	// Check if user exists
+	_, err := s.userRepo.UserFromId(userID)
+	if err != nil {
+		return nil, err
+	}
+	var errItems []models.OrderItem
+	for _, item := range oItems {
+		i, err := s.itemRepo.FindByID(item.ItemID)
+		// If any check fails, add item to errItems
+		// Check if items exists
+		// Check if Status is "Available"
+		// Check if Quantity is greater than 0 and Quantity request in order is less than or equal to 80% of the Quantity in stock
+		if err != nil || i.Status != "Available" || i.Quantity <= 0 || item.Quantity <= 0 || float64(item.Quantity) > float64(i.Quantity)*0.8 {
+			errItems = append(errItems, item)
+			fmt.Println(errItems)
+			continue
+		}
+		// Calculate total price
+		item.Price = 10
+		item.ItemID = i.ID
+	}
+
+	// If there are any errors, return them
+	if len(errItems) > 0 {
+		// Return error with items that have, errItems json array format
+		return nil, fmt.Errorf("error with items: %v", errItems)
+	}
+
+	// Create order
+	var order = models.Order{
+		UserID: userID,
+		Status: "Pending",
+	}
+	// Convertir la estructura a JSON
+	orderJSON, err := json.MarshalIndent(order, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	orderJSON1, err := json.MarshalIndent(oItems, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	// print order in json format using marshal
+	fmt.Println("orderJSON", string(orderJSON))
+	// print oItems in json format
+	fmt.Println("orderJSON1", string(orderJSON1))
+
+	// Call repository to create order
+	if err := s.orderRepo.Create(&order, oItems); err != nil {
+		return nil, err
+	}
+	// Update items quantity
+	for _, item := range oItems {
+		i, _ := s.itemRepo.FindByID(item.ItemID)
+		i.Quantity -= item.Quantity
+		if err := s.itemRepo.UpdateItem(i); err != nil {
+			return nil, err
+		}
+	}
+	return &order, nil
 }
 
 func (s *authService) GetOrderStatus(orderID uint) (*models.Order, error) {

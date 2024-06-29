@@ -6,12 +6,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/ICOMP-UNC/newworld-agustinhernando2/cmd/tools"
 	"github.com/ICOMP-UNC/newworld-agustinhernando2/cmd/controllers"
+	"github.com/ICOMP-UNC/newworld-agustinhernando2/cmd/tools"
+	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/middleware"
+	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/models"
 	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/repositories"
 	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/services"
-	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/models"
-	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
@@ -24,8 +24,6 @@ import (
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
-
-
 
 func ConnectDatabase(pass, user, name string) (db *gorm.DB) {
 	dsn := fmt.Sprintf(
@@ -49,6 +47,15 @@ func ConnectDatabase(pass, user, name string) (db *gorm.DB) {
 	log.Println("Connected")
 	db.Logger = logger.Default.LogMode(logger.Info)
 
+	// Change model Person's field Addresses' join table to PersonAddress
+	// PersonAddress must defined all required foreign keys or it will raise error
+	db.SetupJoinTable(&models.Order{}, "Item", &models.OrderItem{})
+	db.SetupJoinTable(&models.Item{}, "Order", &models.OrderItem{})
+
+	if err != nil {
+		log.Fatal("Failed to connect to database. \n", err)
+		os.Exit(2)
+	}
 	dbMigrate(db)
 	return db
 }
@@ -108,7 +115,7 @@ func main() {
 	firstGroup := app.Group("/")
 	firstGroup.Get("/signup", authController.GetSignupPage)
 	firstGroup.Get("/login", authController.GetLoginPage)
-	firstGroup.Post("/register", authController.RegisterUser)
+	firstGroup.Post("/signup", authController.RegisterUser)
 	firstGroup.Post("/login", authController.LoginUser)
 
 	// Authentication routes

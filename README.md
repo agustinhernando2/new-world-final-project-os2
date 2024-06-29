@@ -135,7 +135,7 @@ Our backend application will interface with the existing HPCPP project to access
 ##### Example httpie
 
 > ```javascript
->  echo -n '{"order":{ "id": 1, items: [{"quantity":10,"product_id":1},{"quantity":5, "product_id":4},{"quantity":3,"product_id":2}]}' | http --auth-type=jwt --auth="<token>" POST localhost:3000/auth/checkout
+>  echo -n '{"order":{ "id": 1, items: [{"quantity":10,"product_id":1},{"quantity":5, "product_id":4},{"quantity":3,"product_id":2}]}}' | http --auth-type=jwt --auth="<token>" POST localhost:3000/auth/checkout
 > ```
 </details>
 
@@ -288,3 +288,49 @@ Model View Repository
   - **Controladores (AuthController y AdminController)**: Utilizan los servicios para manejar las solicitudes HTTP.
   - **Repositorios (UserRepository, ItemRepository y OrderRepository)**: Son los responsables de interactuar con la base de datos, pero ahora son utilizados principalmente por los servicios.
   - Esta estructura promueve una separación clara de responsabilidades y facilita la reutilización del código, ya que los servicios pueden ser utilizados en diferentes contextos (por ejemplo, en un CLI o en pruebas unitarias).
+
+Modo de testing usando CURL:
+- **GET OFFERS**
+```bash
+╭─agustin@Agus-GF63-Thin-10UC ~/MisCosas/so2-2024/newworld-agustinhernando2  ‹first_milestone*› 
+╰─➤  curl -X 'GET' \            
+  'http://172.18.0.3:3000/auth/offers' \
+  -H 'accept: application/json' \
+  -b 'Authorization=XXXXXXXXXXX-SECURE-TOKEN-XXXXXXXXXXX'
+```
+
+- **POST CHECKOUT**
+```bash
+curl -X 'POST' \
+  'http://172.18.0.2:3000/auth/checkout' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXX' \
+  -d '[
+        {
+          "ID": 1,
+          "quantity": 2
+        },
+        {
+          "ID": 2,
+          "quantity": 2
+        },
+        {
+          "ID": 3,
+          "quantity": 1
+        }
+      ]'
+```
+
+- **POST LOGIN**
+```bash
+curl -X 'POST' \
+curl -X 'POST' \
+  'http://172.18.0.2:3000/login' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "password":"Santi1",
+  "email":"santi1@gmail.com"
+}'
+```
