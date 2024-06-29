@@ -50,7 +50,7 @@ func (c *AuthController) CheckoutOrders(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&items); err != nil {
 		// error 400 Bad Request
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Cannot parse input data",
+			"message": "Cannot parse input data.",
 			"error":   err.Error(),
 		})
 	}
@@ -59,7 +59,7 @@ func (c *AuthController) CheckoutOrders(ctx *fiber.Ctx) error {
 	details, ok := user.(*models.User)
 	if !ok {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Cannot parse input data",
+			"message": "Cannot parse input data.",
 			"error":   "user not found",
 		})
 	}
