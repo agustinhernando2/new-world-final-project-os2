@@ -22,7 +22,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"gorm.io/gorm/schema"
 )
 
 func ConnectDatabase(pass, user, name string) (db *gorm.DB) {
@@ -34,9 +33,9 @@ func ConnectDatabase(pass, user, name string) (db *gorm.DB) {
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true,
-		},
+		// NamingStrategy: schema.NamingStrategy{
+		// 	SingularTable: true,
+		// },
 	})
 
 	if err != nil {
@@ -49,8 +48,8 @@ func ConnectDatabase(pass, user, name string) (db *gorm.DB) {
 
 	// Change model Person's field Addresses' join table to PersonAddress
 	// PersonAddress must defined all required foreign keys or it will raise error
-	db.SetupJoinTable(&models.Order{}, "Item", &models.OrderItem{})
-	db.SetupJoinTable(&models.Item{}, "Order", &models.OrderItem{})
+	db.SetupJoinTable(&models.Order{}, "Items", &models.OrderItem{})
+	db.SetupJoinTable(&models.Item{}, "Orders", &models.OrderItem{})
 
 	if err != nil {
 		log.Fatal("Failed to connect to database. \n", err)
@@ -62,7 +61,7 @@ func ConnectDatabase(pass, user, name string) (db *gorm.DB) {
 
 func dbMigrate(db *gorm.DB) {
 	// Migrate the schema
-	log.Println("Running migrations")
+	log.Println("Running migrations.")
 	db.AutoMigrate(&models.User{}, &models.Item{}, &models.Order{}, &models.OrderItem{})
 }
 
@@ -128,7 +127,7 @@ func main() {
 	adminGroup := app.Group("/admin", authMiddleware.AdminMiddleware)
 	adminGroup.Get("/dashboard", adminController.GetDashboard)
 	adminGroup.Post("/updatesupplies", adminController.UpdateItemsAvailables)
-	adminGroup.Patch("/orders/:id", adminController.UpdateOrderStatus)
+	adminGroup.Patch("/order/:id", adminController.UpdateOrderStatus)
 
 	// Swagger documentation
 	app.Get("/swagger/*", swagger.HandlerDefault)

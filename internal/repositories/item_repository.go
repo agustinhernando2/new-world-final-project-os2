@@ -78,6 +78,6 @@ func (r *itemRepository) CreateItem(item *models.Item) error {
 }
 func (r *itemRepository) GetAllItems(db *gorm.DB) ([]models.Item, error) {
 	var items []models.Item
-	err := db.Model(&models.Item{}).Preload("item").Find(&items).Error
+	err := db.Model(&models.Item{}).Preload("Items").Find(&items).Error
 	return items, err
 }

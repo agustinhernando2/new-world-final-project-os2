@@ -302,21 +302,21 @@ Modo de testing usando CURL:
 - **POST CHECKOUT**
 ```bash
 curl -X 'POST' \
-  'http://172.18.0.2:3000/auth/checkout' \
+  'http://172.18.0.3:3000/auth/checkout' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
-  -b 'Authorization=XXXX' \
+  -b 'Authorization=XXXXXX' \
   -d '[
         {
-          "ID": 1,
+          "itemID": 1,
           "quantity": 2
         },
         {
-          "ID": 2,
+          "itemID": 2,
           "quantity": 2
         },
         {
-          "ID": 3,
+          "itemID": 3,
           "quantity": 1
         }
       ]'
@@ -325,10 +325,22 @@ curl -X 'POST' \
 - **POST LOGIN**
 ```bash
 curl -X 'POST' \
-curl -X 'POST' \
   'http://172.18.0.2:3000/login' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
+  -d '{
+  "password":"Santi1",
+  "email":"santi1@gmail.com"
+}'
+```
+
+- **POST Update supplies**
+```bash
+curl -X 'POST' \
+  'http://172.18.0.3:3000/admin/updatesupplies' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXXXX'\
   -d '{
   "password":"Santi1",
   "email":"santi1@gmail.com"

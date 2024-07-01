@@ -14,7 +14,7 @@ type Item struct {
 	Price    float64 `json:"price" gorm:"not null;default:0"`            // @Description Item Price
 	Quantity int     `json:"quantity" gorm:"not null;default:0"`         // @Description Item Quantity
 	Status   string  `json:"status" gorm:"text;not null;default:null"`   // @Description Order Status
-	Orders   []Order `json:"orders" gorm:"many2many:order_item;"`        // @Description Orders associated with this item
+	Orders   []Order `json:"orders" gorm:"many2many:order_items;"`        // @Description Orders associated with this item
 
 }
 
@@ -23,7 +23,7 @@ type Order struct {
 	ID     uint   `gorm:"unique;primaryKey;autoIncrement"`
 	UserID uint   `json:"userId" gorm:"not null;default:0"`         // @Description User ID
 	Status string `json:"status" gorm:"text;not null;default:null"` // @Description Order Status
-	Items  []Item `json:"items" gorm:"many2many:order_item;"`       // @Description Items associated with this order
+	Items  []Item `json:"items" gorm:"many2many:order_items;"`       // @Description Items associated with this order
 }
 
 type OrderItem struct {

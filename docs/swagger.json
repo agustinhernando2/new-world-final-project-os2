@@ -97,6 +97,49 @@
                 }
             }
         },
+        "/auth/orders/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve the status of an order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Retrieve the status of an order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the order to retrieve",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status of the order",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order"
+                        }
+                    },
+                    "501": {
+                        "description": "Not implemented",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "description": "Register a new user with the data provided in the request body.",

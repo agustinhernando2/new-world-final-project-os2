@@ -80,9 +80,54 @@ func (c *AuthController) CheckoutOrders(ctx *fiber.Ctx) error {
 	})
 }
 
+// GetOrderStatus retrieves the status of an order.
+//
+//	@Summary		Retrieve the status of an order
+//	@Description	Retrieve the status of an order.
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int				true	"ID of the order to retrieve"
+//	@Success		200	{object}	models.Order	"Status of the order"
+//	@Failure		501	{object}	string			"Not implemented"
+//	@Router			/auth/orders/{id} [get]
+//	@Security		ApiKeyAuth
 func (c *AuthController) GetOrderStatus(ctx *fiber.Ctx) error {
-	// Implementar lógica para obtener el estado de una orden específica
-	return ctx.SendStatus(fiber.StatusNotImplemented)
+	// Get orderID from path
+	orderID, err := ctx.ParamsInt("id")
+	if err != nil {
+		// error 400 Bad Request
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Cannot parse input data.",
+			"error":   err.Error(),
+		})
+	}
+
+	// Get userID from giber scope
+	user := ctx.Locals("user")
+	details, ok := user.(*models.User)
+	if !ok {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Cannot parse input data.",
+			"error":   "user not found",
+		})
+	}
+
+	// Call service
+	orderStatus, err := c.AuthService.GetOrderStatus(details.ID, uint(orderID))
+	if err != nil {
+		// error 400 Bad Request
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Error getting order",
+			"error":   err.Error(),
+		})
+	}
+
+	// success 200 OK
+	return ctx.JSON(fiber.Map{
+		"orderID": orderID,
+		"status": orderStatus,
+	})
 }
 
 // RegisterUser Register a new user with the data provided in the request body.

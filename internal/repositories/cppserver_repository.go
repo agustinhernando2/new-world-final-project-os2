@@ -64,8 +64,8 @@ func normalizeData(data map[string]map[string]int) []models.Item {
             item := models.Item{
                 Name:     name,
                 Category: category,
-                Price:    1.0,
-                Quantity: quantity,
+                Price:    float64(1.0),
+                Quantity: int(quantity),
                 Status:   "Available",
             }
             items = append(items, item)

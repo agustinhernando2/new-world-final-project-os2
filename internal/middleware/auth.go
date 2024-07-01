@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/ICOMP-UNC/newworld-agustinhernando2/cmd/tools"
@@ -90,40 +89,28 @@ func (c *AuthMiddleware) AdminMiddleware(ctx *fiber.Ctx) error {
 			"message": "Unauthorized access",
 			"error":   "No token provided",
 		})
-
 	}
 
 	// Extract the JWT token from the cookie
-
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		hmacSampleSecret := []byte(tools.GetEnvValue("ADMIN_SECRET_KEY", "secret_key"))
-		return hmacSampleSecret, nil
-	})
+	token, err := extractToken(tokenStr, "ADMIN_SECRET_KEY")
 	if err != nil {
-		log.Fatal(err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Unauthorized access",
 			"error":   err.Error(),
 		})
-
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Unauthorized access",
-			"error":   "Invalid token",
+			"error":   "Token expired",
 		})
 
 	}
 
 	// Check expiry of the token
-	if claims["ttl"].(int64) < time.Now().Unix() {
+	if claims["ttl"].(float64) < float64(time.Now().Unix()) {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "Unauthorized access",
 			"error":   "Token expired",
@@ -132,7 +119,8 @@ func (c *AuthMiddleware) AdminMiddleware(ctx *fiber.Ctx) error {
 	}
 
 	// Extract the user from the token
-	userID := claims["userID"].(uint)
+	userID := uint(claims["userID"].(float64))
+
 	user, err := c.AuthService.GetUserFromId(userID)
 	if err != nil {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{

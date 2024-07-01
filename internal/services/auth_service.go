@@ -15,7 +15,8 @@ type AuthService interface {
 	AuthenticateUser(user *models.User) error
 	GetOffers() ([]*models.Item, error)
 	CheckoutOrders(userID uint, items []models.OrderItem) (*models.Order, error)
-	GetOrderStatus(orderID uint) (*models.Order, error)
+	GetOrder(userID uint, orderID uint) (*models.Order, error)
+	GetOrderStatus(userID uint, orderID uint) (string, error)
 	GetUserFromId(userID uint) (*models.User, error)
 }
 
@@ -98,7 +99,7 @@ func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*m
 		return nil, err
 	}
 	var errItems []models.OrderItem
-	for _, item := range oItems {
+	for index, item := range oItems {
 		i, err := s.itemRepo.FindByID(item.ItemID)
 		// If any check fails, add item to errItems
 		// Check if items exists
@@ -109,9 +110,7 @@ func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*m
 			fmt.Println(errItems)
 			continue
 		}
-		// Calculate total price
-		item.Price = 10
-		item.ItemID = i.ID
+		oItems[index].Price = i.Price
 	}
 
 	// If there are any errors, return them
@@ -126,18 +125,12 @@ func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*m
 		Status: "Pending",
 	}
 	// Convertir la estructura a JSON
-	orderJSON, err := json.MarshalIndent(order, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	orderJSON1, err := json.MarshalIndent(oItems, "", "  ")
-	if err != nil {
-		return nil, err
-	}
+	// orderJSON, err := json.MarshalIndent(order, "", "  ")
+	// if err != nil {
+	// 	return nil, err
+	// }
 	// print order in json format using marshal
-	fmt.Println("orderJSON", string(orderJSON))
-	// print oItems in json format
-	fmt.Println("orderJSON1", string(orderJSON1))
+	// fmt.Println("orderJSON", string(orderJSON))
 
 	// Call repository to create order
 	if err := s.orderRepo.Create(&order, oItems); err != nil {
@@ -154,8 +147,36 @@ func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*m
 	return &order, nil
 }
 
-func (s *authService) GetOrderStatus(orderID uint) (*models.Order, error) {
-	return s.orderRepo.FindByID(orderID)
+func (s *authService) GetOrderStatus(userID uint, orderID uint) (string, error) {
+	order, err := s.GetOrder(userID, orderID)
+	if err != nil {
+		return "", err
+	}
+	return order.Status, nil
+}
+
+func (s *authService) GetOrder(userID uint, orderID uint) (*models.Order, error) {
+	// Check if user exists
+	_, err := s.userRepo.UserFromId(userID)
+	if err != nil {
+		return nil, err
+	}
+	// Check if order exists and is owned by user
+	order, err := s.orderRepo.FindByID(orderID)
+	if err != nil {
+		return nil, err
+	}
+	if order.UserID != userID {
+		return nil, fmt.Errorf("order not found")
+	}
+		// Convertir la estructura a JSON
+	json, err := json.MarshalIndent(order, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	// print order in json format using marshal
+	fmt.Println("json", string(json))
+	return order, nil
 }
 
 func (s *authService) GetUserFromId(userID uint) (*models.User, error) {

@@ -151,6 +151,33 @@ paths:
       summary: Retrieve a list of available offers
       tags:
       - Auth
+  /auth/orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the status of an order.
+      parameters:
+      - description: ID of the order to retrieve
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status of the order
+          schema:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order'
+        "501":
+          description: Not implemented
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve the status of an order
+      tags:
+      - Auth
   /auth/register:
     post:
       consumes:
