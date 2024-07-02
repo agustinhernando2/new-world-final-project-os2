@@ -2,9 +2,10 @@
 package services
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 
 	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/models"
 	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/repositories"
@@ -13,7 +14,7 @@ import (
 type AuthService interface {
 	RegisterUser(user *models.User) error
 	AuthenticateUser(user *models.User) error
-	GetOffers() ([]*models.Item, error)
+	GetOffers() ([]models.Item, error)
 	CheckoutOrders(userID uint, items []models.OrderItem) (*models.Order, error)
 	GetOrder(userID uint, orderID uint) (*models.Order, error)
 	GetOrderStatus(userID uint, orderID uint) (string, error)
@@ -87,8 +88,35 @@ func (s *authService) AuthenticateUser(user *models.User) error {
 	return nil
 }
 
-func (s *authService) GetOffers() ([]*models.Item, error) {
-	return s.itemRepo.FindOffers()
+func (s *authService) GetOffers() ([]models.Item, error) {
+	items, err := s.itemRepo.FindOffersByStatus("Available")
+	if err != nil {
+		return nil, err
+	}
+	// Modify quantity to show 20%
+	for index, item := range items {
+		items[index].Quantity = int(float64(item.Quantity) * 0.2) // show 20%
+	}
+	// Filter items with quantity > 0
+	var offers []models.Item
+	for _, item := range items {
+		if item.Quantity > 0 {
+			offers = append(offers, item)
+		}
+	}
+	// order by quantity available
+	sort.Slice(offers, func(i, j int) bool {
+		return offers[i].Quantity > offers[j].Quantity
+	})
+	// // Convertir la estructura a JSON
+	// json, err := json.MarshalIndent(offers, "", "  ")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// // print order in json format using marshal
+	// fmt.Println("json", string(json))
+
+	return offers, nil
 }
 
 func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*models.Order, error) {
@@ -99,6 +127,7 @@ func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*m
 		return nil, err
 	}
 	var errItems []models.OrderItem
+	var totalPrice float64
 	for index, item := range oItems {
 		i, err := s.itemRepo.FindByID(item.ItemID)
 		// If any check fails, add item to errItems
@@ -111,6 +140,7 @@ func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*m
 			continue
 		}
 		oItems[index].Price = i.Price
+		totalPrice += i.Price * float64(item.Quantity)
 	}
 
 	// If there are any errors, return them
@@ -123,6 +153,7 @@ func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*m
 	var order = models.Order{
 		UserID: userID,
 		Status: "Pending",
+		Total : totalPrice,
 	}
 	// Convertir la estructura a JSON
 	// orderJSON, err := json.MarshalIndent(order, "", "  ")
@@ -140,6 +171,10 @@ func (s *authService) CheckoutOrders(userID uint, oItems []models.OrderItem) (*m
 	for _, item := range oItems {
 		i, _ := s.itemRepo.FindByID(item.ItemID)
 		i.Quantity -= item.Quantity
+		// if quantity is 0, change status to "Sold Out"
+		if i.Quantity == 0 {
+			i.Status = "Sold Out"
+		}
 		if err := s.itemRepo.UpdateItem(i); err != nil {
 			return nil, err
 		}
@@ -169,13 +204,13 @@ func (s *authService) GetOrder(userID uint, orderID uint) (*models.Order, error)
 	if order.UserID != userID {
 		return nil, fmt.Errorf("order not found")
 	}
-		// Convertir la estructura a JSON
-	json, err := json.MarshalIndent(order, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	// print order in json format using marshal
-	fmt.Println("json", string(json))
+	// // Convertir la estructura a JSON
+	// json, err := json.MarshalIndent(order, "", "  ")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// // print order in json format using marshal
+	// fmt.Println("json", string(json))
 	return order, nil
 }
 

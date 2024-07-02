@@ -322,6 +322,16 @@ curl -X 'POST' \
       ]'
 ```
 
+- **GET ORDER**
+```bash
+curl -X 'GET' \
+  'http://172.18.0.3:3000/auth/orders/1' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXXXX' \
+  -d '{}'
+```
+
 - **POST LOGIN**
 ```bash
 curl -X 'POST' \
@@ -342,7 +352,28 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -b 'Authorization=XXXXXX'\
   -d '{
-  "password":"Santi1",
-  "email":"santi1@gmail.com"
+}'
+```
+
+- **PATCH Update order status**
+```bash
+curl -X 'PATCH' \
+  'http://172.18.0.3:3000/admin/order/1' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXXXX'\
+  -d '{
+    "status":"Processing"
+}'
+```
+
+- **PATCH Update order status**
+```bash
+curl -X 'GET' \
+  'http://172.18.0.3:3000/admin/dashboard' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXXXX'\
+  -d '{
 }'
 ```

@@ -44,6 +44,17 @@ func (c *AuthController) GetOffers(ctx *fiber.Ctx) error {
 }
 
 // CheckoutOrders Buy a list of orders.
+//
+//	@Summary		Buy a list of orders
+//	@Description	Buy a list of orders from an authenticated user.
+//	@Tags			Auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		[]models.OrderItem	true	"List of orders to buy"
+//	@Success		201		{object}	models.Order		"Orders checked out successfully"
+//	@Failure		400		{object}	string				"Cannot parse input data or checking out orders"
+//	@Router			/auth/checkout [post]
+//	@Security		ApiKeyAuth
 func (c *AuthController) CheckoutOrders(ctx *fiber.Ctx) error {
 	var items []models.OrderItem
 	// Check and parse input data
@@ -126,7 +137,7 @@ func (c *AuthController) GetOrderStatus(ctx *fiber.Ctx) error {
 	// success 200 OK
 	return ctx.JSON(fiber.Map{
 		"orderID": orderID,
-		"status": orderStatus,
+		"status":  orderStatus,
 	})
 }
 

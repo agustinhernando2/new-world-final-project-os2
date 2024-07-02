@@ -2,7 +2,7 @@
 package repositories
 
 import (
-	"fmt"
+	// "fmt"
 
 	"github.com/ICOMP-UNC/newworld-agustinhernando2/internal/models"
 	"gorm.io/gorm"
@@ -10,8 +10,8 @@ import (
 
 type ItemRepository interface {
 	FindAll() ([]*models.Item, error)
-    FindByID(itemID uint) (*models.Item, error)
-	FindOffers() ([]*models.Item, error)
+	FindByID(itemID uint) (*models.Item, error)
+	FindOffersByStatus(status string) ([]models.Item, error)
 	UpdateItem(item *models.Item) error
 	CreateItem(item *models.Item) error
 	GetItemByCategoryAndName(category string, name string) (*models.Item, error)
@@ -27,28 +27,21 @@ func NewItemRepository(db *gorm.DB) ItemRepository {
 	return &itemRepository{db: db}
 }
 func (r *itemRepository) FindByID(itemID uint) (*models.Item, error) {
-    var item models.Item
-    err := r.db.First(&item, itemID).Error
-    return &item, err
+	var item models.Item
+	err := r.db.First(&item, itemID).Error
+	return &item, err
+}
+
+func (r *itemRepository) FindOffersByStatus(status string) ([]models.Item, error) {
+	var items []models.Item
+	err := r.db.Where("status = ?", status).Find(&items).Error
+	return items, err
 }
 
 func (r *itemRepository) FindAll() ([]*models.Item, error) {
 	var items []*models.Item
 	err := r.db.Find(&items).Error
 	return items, err
-}
-
-func (r *itemRepository) FindOffers() ([]*models.Item, error) {
-	var items []*models.Item
-	err := r.db.Where("quantity > 0").Find(&items).Error
-	if err != nil {
-		return nil, err
-	}
-	for _, item := range items {
-		item.Quantity = int(float64(item.Quantity) * 0.8) // show 20%
-	}
-	fmt.Println("items")
-	return items, nil
 }
 
 func (r *itemRepository) UpdateItemsAvailables() error {

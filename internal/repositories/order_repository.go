@@ -14,6 +14,8 @@ type OrderRepository interface {
 	UpdateStatus(orderID uint, status string) error
 	GetAllOrders() ([]models.Order, error)
 	GetOrders(userID uint) ([]models.Order, error)
+	DeleteOrder(order *models.Order) error
+	GetOrderItems(orderID uint) ([]models.OrderItem, error)
 }
 
 type orderRepository struct {
@@ -65,8 +67,8 @@ func (r *orderRepository) Create(order *models.Order, oItems []models.OrderItem)
 
 func (r *orderRepository) FindByID(orderID uint) (*models.Order, error) {
 	var order models.Order
-	if err := r.db.Preload("Items").Joins("JOIN order_items ON order_items.order_id = orders.id").
-		Where("orders.id = ?", orderID).First(&order).Error; err != nil {
+	err := r.db.Preload("Items").First(&order, orderID).Error
+	if err != nil {
 		return nil, err
 	}
 	return &order, nil
@@ -78,12 +80,24 @@ func (r *orderRepository) UpdateStatus(orderID uint, status string) error {
 
 func (r *orderRepository) GetAllOrders() ([]models.Order, error) {
 	var orders []models.Order
-	err := r.db.Model(&models.Order{}).Preload("Item").Find(&orders).Error
+	err := r.db.Model(&models.Order{}).Preload("Items").Find(&orders).Error
 	return orders, err
 }
 
 func (r *orderRepository) GetOrders(userID uint) ([]models.Order, error) {
 	var orders []models.Order
-	err := r.db.Model(&models.Order{}).Where("user_id = ?", userID).Preload("Item").Find(&orders).Error
+	err := r.db.Model(&models.Order{}).Where("user_id = ?", userID).Preload("Items").Find(&orders).Error
 	return orders, err
+}
+
+func (r *orderRepository) DeleteOrder(order *models.Order) error {
+	return r.db.Delete(order).Error
+}
+
+func (r *orderRepository) GetOrderItems(orderID uint) ([]models.OrderItem, error) {
+	items, err := r.FindByID(orderID)
+	if err != nil {
+		return nil, err
+	}
+	return items.Items, nil
 }

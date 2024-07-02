@@ -8,6 +8,132 @@
         "version": "1.0"
     },
     "paths": {
+        "/admin/dashboard": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve the dashboard information about orders and offers. The user must be authenticated as an admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Retrieve the dashboard information",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard information",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get dashboard",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update the status of an order. The new status must be provided in the request body. The user must be authenticated as an admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update the status of an order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order status updated successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Cannot parse input data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update order status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/updatesupplies": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update the available items in the Cpp Server Storage. The user must be authenticated as an admin.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update the available items",
+                "responses": {
+                    "200": {
+                        "description": "Items updated successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to update",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authenticate a user with the data provided in the request body.",
@@ -92,6 +218,54 @@
                         "description": "Failed to retrieve offers",
                         "schema": {
                             "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/orders": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Buy a list of orders from an authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Buy a list of orders",
+                "parameters": [
+                    {
+                        "description": "List of orders to buy",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Orders checked out successfully",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Cannot parse input data or checking out orders",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -256,7 +430,7 @@
                     "description": "@Description Orders associated with this item",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order"
+                        "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem"
                     }
                 },
                 "price": {
@@ -292,18 +466,47 @@
                     "description": "@Description Items associated with this order",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Item"
+                        "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem"
                     }
                 },
                 "status": {
                     "description": "@Description Order Status",
                     "type": "string"
                 },
+                "total": {
+                    "description": "@Description Item Price",
+                    "type": "number"
+                },
                 "updatedAt": {
                     "type": "string"
                 },
                 "userId": {
                     "description": "@Description User ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "itemID": {
+                    "type": "integer"
+                },
+                "orderID": {
+                    "type": "integer"
+                },
+                "price": {
+                    "description": "@Description Item Price",
+                    "type": "number"
+                },
+                "quantity": {
+                    "description": "@Description Item Quantity in Order",
                     "type": "integer"
                 }
             }
