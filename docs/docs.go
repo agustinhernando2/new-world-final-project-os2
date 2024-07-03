@@ -50,7 +50,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/orders/{id}": {
+        "/admin/order/{id}": {
             "patch": {
                 "security": [
                     {
@@ -142,6 +142,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/checkout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Buy a list of orders from an authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Buy a list of orders",
+                "parameters": [
+                    {
+                        "description": "List of orders to buy",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Orders checked out successfully",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Cannot parse input data or checking out orders",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Authenticate a user with the data provided in the request body.",
@@ -226,54 +274,6 @@ const docTemplate = `{
                         "description": "Failed to retrieve offers",
                         "schema": {
                             "$ref": "#/definitions/fiber.Map"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/orders": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Buy a list of orders from an authenticated user.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Buy a list of orders",
-                "parameters": [
-                    {
-                        "description": "List of orders to buy",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Orders checked out successfully",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order"
-                        }
-                    },
-                    "400": {
-                        "description": "Cannot parse input data or checking out orders",
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 }

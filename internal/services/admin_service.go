@@ -134,5 +134,10 @@ func (s *adminService) UpdateStorage() ([]models.Item, error) {
 			}
 		}
 	}
+	// Delete cppserver items
+	err = s.cppRepo.DeleteSupplies()
+	if err != nil {
+		return nil, err
+	} 
 	return items, nil
 }

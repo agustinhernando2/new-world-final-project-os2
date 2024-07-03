@@ -22,6 +22,7 @@ type cppRepository struct {
 // CppRepository define la interfaz para obtener suministros
 type CppRepository interface {
     GetSupplies() ([]models.Item, error)
+    DeleteSupplies() (error)
 }
 
 // NewCppNewCppRepository crea una nueva instancia de cppRepository
@@ -72,4 +73,23 @@ func normalizeData(data map[string]map[string]int) []models.Item {
         }
     }
     return items
+}
+
+// DeleteSupplies sending a DELETE request to the cpp server, the endpoint is /deletesupplies
+func (handler *cppRepository) DeleteSupplies() (error) {
+    url := fmt.Sprintf("http://%s:%s/deletesupplies", handler.Config.Host, handler.Config.Port)
+
+    req, err := http.NewRequest(http.MethodGet, url, nil)
+    if err != nil {
+        return fmt.Errorf("error creating DELETE request: %v", err)
+    }
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        return fmt.Errorf("error making DELETE request: %v", err)
+    }
+    defer resp.Body.Close()
+
+    return nil
 }

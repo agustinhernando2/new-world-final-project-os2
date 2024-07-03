@@ -136,7 +136,7 @@ paths:
       summary: Retrieve the dashboard information
       tags:
       - Admin
-  /admin/orders/{id}:
+  /admin/order/{id}:
     patch:
       consumes:
       - application/json
@@ -196,6 +196,36 @@ paths:
       summary: Update the available items
       tags:
       - Admin
+  /auth/checkout:
+    post:
+      consumes:
+      - application/json
+      description: Buy a list of orders from an authenticated user.
+      parameters:
+      - description: List of orders to buy
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Orders checked out successfully
+          schema:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order'
+        "400":
+          description: Cannot parse input data or checking out orders
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Buy a list of orders
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:
@@ -251,36 +281,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Retrieve a list of available offers
-      tags:
-      - Auth
-  /auth/orders:
-    post:
-      consumes:
-      - application/json
-      description: Buy a list of orders from an authenticated user.
-      parameters:
-      - description: List of orders to buy
-        in: body
-        name: request
-        required: true
-        schema:
-          items:
-            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem'
-          type: array
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Orders checked out successfully
-          schema:
-            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order'
-        "400":
-          description: Cannot parse input data or checking out orders
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: Buy a list of orders
       tags:
       - Auth
   /auth/orders/{id}:

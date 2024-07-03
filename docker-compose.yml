@@ -1,18 +1,22 @@
 version: '3.8'
 
 services:
-  web:
+  fiberapi:
     build: 
       context: .
       dockerfile: Dockerfile
     env_file:
       - .env
     ports:
-      - "4000:4000"
       - "3000:3000"
     volumes:
       - .:/app
     command: ./scripts/start.sh
+    labels:
+      - traefik.http.routers.fiberapi.rule=Host(`fiberapi.localhost`)
+      - traefik.http.services.fiberapi.loadbalancer.server.port=3000
+    depends_on:
+      - reverse-proxy
   db:
     image: postgres:alpine
     environment:
@@ -23,6 +27,24 @@ services:
       - "5432:5432"
     volumes:
       - postgres-db:/var/lib/postgresql/data
-
+  reverse-proxy:
+    image: traefik:v3.0
+    # command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
+      - ./traefik.yml:/traefik.yml
+      - ./dynamic_conf.yml:/dynamic_conf.yml
+      - ./acme.json:/acme.json
+      - ./traefik.log:/traefik.log
+  whoami:
+    image: traefik/whoami # A container that exposes an API to show its IP address
+    labels:
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+    depends_on:
+      - reverse-proxy
 volumes:
   postgres-db:
