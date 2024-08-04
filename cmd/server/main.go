@@ -69,7 +69,10 @@ func connectDatabase(pass, user, name string) (db *gorm.DB) {
 func dbMigrate(db *gorm.DB) {
 	// Migrate the schema
 	log.Println("Running migrations.")
-	db.AutoMigrate(&models.User{}, &models.Item{}, &models.Order{}, &models.OrderItem{})
+	if db.AutoMigrate(&models.User{}, &models.Item{}, &models.Order{}, &models.OrderItem{}) != nil {
+		log.Fatal("Failed to migrate database. \n")
+		os.Exit(2)
+	}
 }
 
 // @title			Order Api
