@@ -350,19 +350,11 @@ curl -X 'POST' \
   'http://fiberapi.localhost:3000/auth/checkout' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
-  -b 'Authorization=XXXXXX' \
+  -b 'Authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0dGwiOjE3Mjg2NzI0ODMsInVzZXJJRCI6Mn0.QMmZ0nr-i-dT1h_48atzSXCTVJxmoasnKAHVyi1V91Y' \
   -d '[
         {
-          "itemID": 1,
-          "quantity": 2
-        },
-        {
-          "itemID": 2,
-          "quantity": 2
-        },
-        {
-          "itemID": 3,
-          "quantity": 1
+          "itemID": 4,
+          "quantity": 10
         }
       ]'
 ```
