@@ -196,7 +196,7 @@ func (c *AuthController) RegisterUser(ctx *fiber.Ctx) error {
 	// return ctx.Redirect("/auth/offers")
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "User registered successfully.",
-		"user":    newUser,
+		// "user":    newUser,
 	})
 }
 
@@ -256,7 +256,7 @@ func (c *AuthController) LoginUser(ctx *fiber.Ctx) error {
 	// return ctx.Redirect("/auth/offers")
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "User logged successfully.",
-		"user":    loggedUser,
+		// "user":    loggedUser,
 	})
 }
 
