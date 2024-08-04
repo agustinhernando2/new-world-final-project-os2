@@ -24,7 +24,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func ConnectDatabase(pass, user, name string) (db *gorm.DB) {
+func connectDatabase(pass, user, name string) (db *gorm.DB) {
 	dsn := fmt.Sprintf(
 		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable",
 		user,
@@ -48,8 +48,15 @@ func ConnectDatabase(pass, user, name string) (db *gorm.DB) {
 
 	// Change model Person's field Addresses' join table to PersonAddress
 	// PersonAddress must defined all required foreign keys or it will raise error
-	db.SetupJoinTable(&models.Order{}, "Items", &models.OrderItem{})
-	db.SetupJoinTable(&models.Item{}, "Orders", &models.OrderItem{})
+	if db.SetupJoinTable(&models.Order{}, "Items", &models.OrderItem{}) != nil {
+		log.Fatal("Failed to connect to database. \n", err)
+		os.Exit(2)
+	}
+
+	if db.SetupJoinTable(&models.Item{}, "Orders", &models.OrderItem{}) != nil {
+		log.Fatal("Failed to connect to database. \n", err)
+		os.Exit(2)
+	}
 
 	if err != nil {
 		log.Fatal("Failed to connect to database. \n", err)
@@ -83,11 +90,11 @@ func main() {
 	}
 	cppRepo := repositories.NewCppRepository(config)
 
-	db_pass := tools.GetEnvValue("DB_PASSWORD", "1234")
-	db_user := tools.GetEnvValue("DB_USER", "agustinhernando")
-	db_name := tools.GetEnvValue("DB_NAME", "agustinhernando")
+	password := tools.GetEnvValue("DB_PASSWORD", "1234")
+	user := tools.GetEnvValue("DB_USER", "agustinhernando")
+	dataBaseName := tools.GetEnvValue("DB_NAME", "agustinhernando")
 
-	db := ConnectDatabase(db_pass, db_user, db_name)
+	db := connectDatabase(password, user, dataBaseName)
 
 	// Start repositories
 	userRepo := repositories.NewUserRepository(db)
