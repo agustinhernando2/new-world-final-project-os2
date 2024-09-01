@@ -135,7 +135,7 @@ Our backend application will interface with the existing HPCPP project to access
 ##### Example httpie
 
 > ```javascript
->  echo -n '{"order":{ "id": 1, items: [{"quantity":10,"product_id":1},{"quantity":5, "product_id":4},{"quantity":3,"product_id":2}]}' | http --auth-type=jwt --auth="<token>" POST localhost:3000/auth/checkout
+>  echo -n '{"order":{ "id": 1, items: [{"quantity":10,"product_id":1},{"quantity":5, "product_id":4},{"quantity":3,"product_id":2}]}}' | http --auth-type=jwt --auth="<token>" POST localhost:3000/auth/checkout
 > ```
 </details>
 
@@ -267,3 +267,169 @@ Our backend application will interface with the existing HPCPP project to access
 > | `200`         | `application/json`                | `{"code":"200",{"message":"success" } `|
 > | `401`         | `application/json`                | `{"code":"401","message":"Unauthorized"}`                           |
 </details>
+
+---
+
+# **MODO DE EJECUCION Y PRUEBAS**
+## 1- Compilación Automatizada y Ejecución en Docker
+```bash
+docker compose up
+ ✔ Container newworld-agustinhernando2-db-1             Created                                                                                                                                      
+ ✔ Container newworld-agustinhernando2-reverse-proxy-1  Created                                                                                                                                      
+ ✔ Container newworld-agustinhernando2-whoami-1         Created                                                                                                                                      
+ ✔ Container newworld-agustinhernando2-fiberapi-1       Created 
+```
+Este comando levanta todos los servicios necesarios definidos en el archivo docker-compose.yml.
+## 2- Utilización de AIR para Desarrollo Continuo
+Para mejorar la experiencia de desarrollo y la eficiencia al implementar cambios, se utiliza AIR, una herramienta que facilita la recarga automática del servidor ante modificaciones en el código.
+```bash
+air -c .air.toml
+```
+El archivo .air.toml está configurado para controlar cómo se compila y se ejecuta el servidor automáticamente cada vez que se detectan cambios en el código.
+
+## 3- Generación de Documentación Swagger
+
+Antes de iniciar el servidor, se genera la documentación Swagger automáticamente utilizando swag. Esto asegura que la documentación de la API esté siempre actualizada y accesible.
+
+```bash
+swag init -g cmd/server/main.go -d . --parseDependency --parseInternal
+swag fmt
+```
+Estos comandos preparan y formatean la documentación Swagger basada en los comentarios de código y las estructuras definidas en main.go.
+
+## 4- Script de Inicio
+
+Se ha creado un script de inicio para automatizar estos pasos:
+
+```bash
+#!/bin/sh
+echo "Starting swagger documentation..."
+
+swag init -g cmd/server/main.go -d . --parseDependency --parseInternal
+swag fmt
+
+echo "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*"
+echo "Starting application..."
+air -c .air.toml
+```
+Este script realiza la generación inicial de la documentación Swagger y luego inicia el servidor con AIR en modo de desarrollo.
+
+El proyecto se ejecuta completamente en Docker utilizando docker-compose. Aquí se crea un entorno consistente que incluye la base de datos, el servidor API con Fiber, y un reverse proxy con Traefik para manejar las peticiones.
+
+## Utils
+
+[Build a REST API from scratch with Go, Docker & Postgres](https://divrhino.com/articles/rest-api-docker-go-fiber-from-scratch/#dockerfile-vs-docker-compose)
+
+```
+docker compose run --service-ports web bash
+go get gorm.io/gorm
+go get gorm.io/driver/postgres
+
+```
+
+## Model View Repository
+- **Explicación del diseño**:
+  - **Servicios (AuthService y AdminService)**: Encapsulan la lógica de negocio relacionada con las operaciones de autenticación y administración respectivamente.
+  - **Controladores (AuthController y AdminController)**: Utilizan los servicios para manejar las solicitudes HTTP.
+  - **Repositorios (UserRepository, ItemRepository y OrderRepository)**: Son los responsables de interactuar con la base de datos, pero ahora son utilizados principalmente por los servicios.
+  - Esta estructura promueve una separación clara de responsabilidades y facilita la reutilización del código, ya que los servicios pueden ser utilizados en diferentes contextos (por ejemplo, en un CLI o en pruebas unitarias).
+
+Modo de testing usando CURL:
+- **GET OFFERS**
+```bash
+╭─agustin@Agus-GF63-Thin-10UC ~/MisCosas/so2-2024/newworld-agustinhernando2  ‹first_milestone*› 
+╰─➤  curl -X 'GET' \            
+  'http://fiberapi.localhost:3000/auth/offers' \
+  -H 'accept: application/json' \
+  -b 'Authorization=XXXXXXXXXXX-SECURE-TOKEN-XXXXXXXXXXX'
+```
+
+- **POST CHECKOUT**
+```bash
+curl -X 'POST' \
+  'http://fiberapi.localhost:3000/auth/checkout' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0dGwiOjE3Mjg2NzI0ODMsInVzZXJJRCI6Mn0.QMmZ0nr-i-dT1h_48atzSXCTVJxmoasnKAHVyi1V91Y' \
+  -d '[
+        {
+          "itemID": 4,
+          "quantity": 10
+        }
+      ]'
+```
+
+- **GET ORDER**
+```bash
+curl -X 'GET' \
+  'http://fiberapi.localhost:3000/auth/orders/1' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXXXX' \
+  -d '{}'
+```
+
+- **POST LOGIN**
+```bash
+curl -X 'POST' \
+  'http://172.18.0.2:3000/login' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "password":"Santi1",
+  "email":"santi1@gmail.com"
+}'
+```
+
+- **POST Update supplies**
+```bash
+curl -X 'POST' \
+  'http://fiberapi.localhost:3000/admin/updatesupplies' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXXXX'\
+  -d '{
+}'
+```
+
+- **PATCH Update order status**
+```bash
+curl -X 'PATCH' \
+  'http://fiberapi.localhost:3000/admin/order/1' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXXXX'\
+  -d '{
+    "status":"Processing"
+}'
+```
+
+- **GET Dashboard**
+```bash
+curl -X 'GET' \
+  'http://fiberapi.localhost:3000/admin/dashboard' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -b 'Authorization=XXXXXX'\
+  -d '{
+}'
+```
+
+- **Probando Servicio TCP**
+```bash
+╰─➤ telnet cppserver.app 8080
+                          1↵
+Trying 192.168.100.148...
+Connected to cppserver.app.
+```
+
+- **Probando Servicio HTTP**
+```bash
+╰─➤ curl -X GET 'https://cppserver.app/supplies'
+                                              7↵                    
+'{
+    "clothes": {
+        "pants": 10
+    }
+}'
+```

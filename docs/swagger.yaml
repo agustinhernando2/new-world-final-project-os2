@@ -1,0 +1,369 @@
+definitions:
+  fiber.Map:
+    additionalProperties: true
+    type: object
+  github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Item:
+    properties:
+      category:
+        description: '@Description Item Category'
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      name:
+        description: '@Description Item Name'
+        type: string
+      orders:
+        description: '@Description Orders associated with this item'
+        items:
+          $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem'
+        type: array
+      price:
+        description: '@Description Item Price'
+        type: number
+      quantity:
+        description: '@Description Item Quantity'
+        type: integer
+      status:
+        description: '@Description Order Status'
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      items:
+        description: '@Description Items associated with this order'
+        items:
+          $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem'
+        type: array
+      status:
+        description: '@Description Order Status'
+        type: string
+      total:
+        description: '@Description Item Price'
+        type: number
+      updatedAt:
+        type: string
+      userId:
+        description: '@Description User ID'
+        type: integer
+    type: object
+  github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      itemID:
+        type: integer
+      orderID:
+        type: integer
+      price:
+        description: '@Description Item Price'
+        type: number
+      quantity:
+        description: '@Description Item Quantity in Order'
+        type: integer
+    type: object
+  github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User:
+    description: User
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        description: '@Description Email'
+        type: string
+      id:
+        type: integer
+      isAdmin:
+        description: '@Description Is Admin, default false'
+        type: boolean
+      password:
+        description: '@Description Password'
+        type: string
+      updatedAt:
+        type: string
+      username:
+        description: '@Description Username'
+        type: string
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+info:
+  contact: {}
+  description: This is an Order Api just for young people
+  termsOfService: http://swagger.io/terms/
+  title: Order Api
+  version: "1.0"
+paths:
+  /admin/dashboard:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the dashboard information about orders and offers. The
+        user must be authenticated as an admin.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard information
+          schema:
+            $ref: '#/definitions/fiber.Map'
+        "500":
+          description: Failed to get dashboard
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve the dashboard information
+      tags:
+      - Admin
+  /admin/order/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Update the status of an order. The new status must be provided
+        in the request body. The user must be authenticated as an admin.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order status updated successfully
+          schema:
+            type: string
+        "400":
+          description: Cannot parse input data
+          schema:
+            type: string
+        "500":
+          description: Failed to update order status
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update the status of an order
+      tags:
+      - Admin
+  /admin/updatesupplies:
+    post:
+      consumes:
+      - application/json
+      description: Update the available items in the Cpp Server Storage. The user
+        must be authenticated as an admin.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Items updated successfully
+          schema:
+            type: string
+        "500":
+          description: Failed to update
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update the available items
+      tags:
+      - Admin
+  /auth/checkout:
+    post:
+      consumes:
+      - application/json
+      description: Buy a list of orders from an authenticated user.
+      parameters:
+      - description: List of orders to buy
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.OrderItem'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Orders checked out successfully
+          schema:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order'
+        "400":
+          description: Cannot parse input data or checking out orders
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Buy a list of orders
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user with the data provided in the request body.
+      parameters:
+      - description: Data of the user to authenticate
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User logged successfully
+          schema:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User'
+        "400":
+          description: Cannot parse input data or login user
+          schema:
+            type: string
+        "500":
+          description: Error creating token
+          schema:
+            type: string
+      summary: Authenticate user
+      tags:
+      - Auth
+  /auth/offers:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of available offers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of available offers
+          schema:
+            items:
+              $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Item'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/fiber.Map'
+        "500":
+          description: Failed to retrieve offers
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve a list of available offers
+      tags:
+      - Auth
+  /auth/orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the status of an order.
+      parameters:
+      - description: ID of the order to retrieve
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status of the order
+          schema:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.Order'
+        "501":
+          description: Not implemented
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Retrieve the status of an order
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the data provided in the request body.
+      parameters:
+      - description: Data of the user to register
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/github_com_ICOMP-UNC_newworld-agustinhernando2_internal_models.User'
+        "400":
+          description: Cannot parse input data or registering user
+          schema:
+            type: string
+      summary: Register user
+      tags:
+      - Auth
+  /login:
+    get:
+      consumes:
+      - text/html
+      description: Retrieve the login page using HTML template.
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: Login page
+          schema:
+            type: string
+      summary: Retrieve the login page
+      tags:
+      - Auth
+  /signup:
+    get:
+      consumes:
+      - text/html
+      description: Retrieve the signup page using HTML template.
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: Signup page
+          schema:
+            type: string
+      summary: Retrieve the signup page
+      tags:
+      - Auth
+swagger: "2.0"

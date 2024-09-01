@@ -1,0 +1,29 @@
+# traefik.yml
+api:
+  insecure: true
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  file:
+    filename: /dynamic_conf.yml
+    watch: true
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: alex.hernando@gmail.com
+      storage: acme.json
+      httpChallenge:
+        entryPoint: web
+
+log:
+  filePath: "/traefik.log"        
+  level: ERROR
+  format: json
+

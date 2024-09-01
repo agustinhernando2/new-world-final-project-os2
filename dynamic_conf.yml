@@ -1,0 +1,41 @@
+http:
+  routers:
+    rest-router:
+      rule: "Host(`cppserver.app`)"
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: myresolver
+      service: rest-service
+    # dashboard:
+    #   rule: Host(`traefik.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+    #   service: api@internal
+  #     middlewares:
+  #       - auth
+  # middlewares:
+  #   auth:
+  #     basicAuth:
+  #       users:
+  #       - admin:{SHA}0DPiKuNIrrVmD8IUCuw1hQxNqZc=
+
+  services:
+    rest-service:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.148:8888"
+
+tcp:
+  routers:
+    tcp-router:
+      rule: "HostSNI(`cppserver.app`)"
+      entryPoints:
+        - websecure
+      tls:
+        passthrough: true
+      service: tcp-service
+
+  services:
+    tcp-service:
+      loadBalancer:
+        servers:
+          - address: "192.168.100.148:8080"
